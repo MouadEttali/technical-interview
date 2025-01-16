@@ -1,8 +1,7 @@
-import boto3
 
-def generate_markdown_report(ps_insights, dataset_insights, model_id="YOUR_BEDROCK_MODEL_ID"):
-    # Initialize AWS Bedrock client
-    client = boto3.client('bedrock')
+from model.models import generate_response
+
+def generate_markdown_report(ps_insights, dataset_insights):
 
     # Markdown Header
     report = "# Machine Learning Problem Report\n\n"
@@ -57,38 +56,9 @@ def generate_markdown_report(ps_insights, dataset_insights, model_id="YOUR_BEDRO
         report += f"**Numerical Columns**: {', '.join(insights.get('numerical_columns', []))}\n\n"
 
     # Optionally use Bedrock to enhance the markdown report by summarizing or adding suggestions
-    bedrock_prompt = f"Enhance the following report for clarity and detail:\n\n{report}"
-    response = client.invoke_model(prompt=bedrock_prompt, modelId=model_id)
-    enhanced_report = response['output']
-    with open("first_insights.md", "r") as f:
-        f.write(enhanced_report)
+    report_prompt = f"Enhance the following report for clarity and detail make sure you add line breaks when needed:\n\n{report}"
+    response = generate_response(prompt=report_prompt, max_tokens=1500)
+
+    with open("first_insights.md", "w") as f:
+        f.write(response)
     print("enhanced report created successfully")
-
-# Example usage:
-ps_insights = {
-    "summary": "This is a problem statement that requires classification.",
-    "ml_problem_type": "Classification",
-    "suggested_features": "Age, Income, Education"
-}
-
-dataset_insights = {
-    "dataset.csv": {
-        "rows": 1000,
-        "columns": 10,
-        "column_names": ["Age", "Income", "Gender", "Education", "Location"],
-        "data_types": {"Age": "int64", "Income": "float64", "Gender": "object", "Education": "object", "Location": "object"},
-        "missing_data": {
-            "missing_count": {"Age": 50, "Income": 20},
-            "missing_percentage": {"Age": 5, "Income": 2}
-        },
-        "summary_statistics": {"Age": {"min": 18, "max": 60, "mean": 35, "std": 10}, "Income": {"min": 1500, "max": 10000, "mean": 4500, "std": 1500}},
-        "duplicate_rows": 10,
-        "outliers": {"Age": 5, "Income": 2},
-        "categorical_distributions": {"Gender": {"Male": 500, "Female": 500}, "Location": {"Urban": 600, "Rural": 400}},
-        "categorical_columns": ["Gender", "Education", "Location"],
-        "numerical_columns": ["Age", "Income"]
-    }
-}
-
-markdown_report = generate_markdown_report(ps_insights, dataset_insights)
-print(markdown_report)

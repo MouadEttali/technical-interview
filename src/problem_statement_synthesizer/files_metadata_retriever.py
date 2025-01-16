@@ -1,6 +1,8 @@
 import os
 from PyPDF2 import PdfReader
-from docx import Document # type:ignore
+from docx import Document
+
+from model.models import generate_response # type:ignore
 
 def extract_preview(file_path, num_lines=5):
     """
@@ -32,7 +34,7 @@ def extract_preview(file_path, num_lines=5):
     else:
         return f"Unsupported file format: {ext}"
 
-def classify_files_bedrock_fast(folder_path, client, model_id, num_lines=5):
+def classify_files_bedrock_fast(folder_path="problem_statement_files", num_lines=5):
     """
     Classify files using AWS Bedrock with limited content preview.
 
@@ -68,12 +70,9 @@ def classify_files_bedrock_fast(folder_path, client, model_id, num_lines=5):
         )
         
         # Call Bedrock
-        response = client.invoke_model(
-            modelId=model_id,
-            inputText=prompt
-        )
-        result = response['body'].read().decode('utf-8')
+        result = generate_response(prompt=prompt, max_tokens=200)
         
+        print(result)
         # Parse response and add to classification
         file_classification[file_path] = result.strip()
     
