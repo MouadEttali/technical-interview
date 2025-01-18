@@ -19,7 +19,6 @@ def first_data_insights(file_path):
     dataset_info = {
         "rows": df.shape[0],
         "columns": df.shape[1],
-        "column_names": df.columns.tolist(),
         "data_types": df.dtypes.to_dict()
     }
 

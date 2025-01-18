@@ -8,9 +8,9 @@ def generate_markdown_report(ps_insights, dataset_insights):
 
     # Add problem statement insights to the report
     report += "## Problem Statement Insights\n"
-    report += f"**Summary**: {ps_insights.get('summary', 'No summary provided')}\n"
-    report += f"**ML Problem Type**: {ps_insights.get('ml_problem_type', 'Not detected')}\n"
-    report += f"**Suggested Features**: {ps_insights.get('suggested_features', 'No features suggested')}\n\n"
+    report += f"**Summary**: \n{ps_insights.get('summary', 'No summary provided')}\n"
+    report += f"**ML Problem Type**: \n {ps_insights.get('ml_problem_type', 'Not detected')}\n"
+    report += f"**Suggested Features**: \n {ps_insights.get('suggested_features', 'No features suggested')}\n\n"
 
     # Add dataset insights to the report
     report += "## Dataset Insights\n"
@@ -19,7 +19,6 @@ def generate_markdown_report(ps_insights, dataset_insights):
         # Dataset dimensions and columns
         report += f"**Number of Rows**: {insights.get('rows', 'Unknown')}\n"
         report += f"**Number of Columns**: {insights.get('columns', 'Unknown')}\n"
-        report += f"**Column Names**: {', '.join(insights.get('column_names', []))}\n"
         report += f"**Data Types**: {', '.join([f'{col}: {dtype}' for col, dtype in insights.get('data_types', {}).items()])}\n\n"
 
         # Missing data
@@ -56,8 +55,11 @@ def generate_markdown_report(ps_insights, dataset_insights):
         report += f"**Numerical Columns**: {', '.join(insights.get('numerical_columns', []))}\n\n"
 
     # Optionally use Bedrock to enhance the markdown report by summarizing or adding suggestions
-    report_prompt = f"Enhance the following report for clarity and detail make sure you add line breaks when needed:\n\n{report}"
-    response = generate_response(prompt=report_prompt, max_tokens=1500)
+    report_prompt = f"Enhance the following report for clarity and detail :\n\n{report}  End of Report\
+        # Requirements for enhancements :\n * make sure there aren't many information stacked in one line so use breaklines for new information \
+        * if a certain information can be written in tabular format do it \
+        * Do not repeate the same information"
+    response = generate_response(prompt=report_prompt, max_tokens=3000)
 
     with open("first_insights.md", "w") as f:
         f.write(response)

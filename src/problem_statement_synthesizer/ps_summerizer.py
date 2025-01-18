@@ -15,27 +15,51 @@ def extract_full_ps_text(file_path):
     else:
         raise ValueError("Unsupported file format. Use .txt, .pdf, or .docx")
 
-def analyze_problem_statement(text):
+def analyze_problem_statement_with_headers(text):
+    # Define the combined prompt with headers
+    combined_prompt = f"""
+    Analyze the following problem statement and do the following tasks:
+
+    1. Summarize the problem statement in 2-3 concise sentences.
+    2. Determine the ML problem type (classification, regression, clustering, or other) and the target variable.
+    3. Identify any special requests, constraints, or criteria that must be followed to address this problem.
+
+    For each of these 3 tasks, start your response with one of these headers:
+
+    # Problem Statement Summary 
+    # ML Problem Type
+    # Special Requests
+
+    Problem Statement: {text}
+    """
     
-    # Summarize the problem statement
-    summary_prompt = f"Summarize the following problem statement in 2-3 concise sentences: {text}"
-    summary = generate_response(prompt=summary_prompt, max_tokens=700)
+    # Generate a single response covering all points
+    response = generate_response(prompt=combined_prompt, max_tokens=1000)
     
-    # Determine ML problem type and target variable
-    ml_prompt = f"Analyze the following problem statement to determine the ML problem type (classification, regression, clustering, or other) and the target variable {text}"
-    ml_insights = generate_response(prompt=ml_prompt, max_tokens=300)
+    # Parse the response based on headers
+    summary = ""
+    ml_problem_type = ""
+    special_requests = ""
     
-    # Suggest important features
-    feature_prompt = f"Identify potentially important features or variables from the problem statement if features are explicitly mentioned: {text}"
-    features = generate_response(prompt=feature_prompt, max_tokens=400)
+    # Split the response into sections
+    for section in response.split("\n#"):
+        if "Problem Statement Summary" in section:
+            summary = section.replace("Problem Statement Summary", "").strip()
+        elif "ML Problem Type" in section:
+            ml_problem_type = section.replace("ML Problem Type", "").strip()
+        elif "Special Requests" in section:
+            special_requests = section.replace("Special Requests", "").strip()
     
+    # Return structured output
     return {
-        "summary": summary.strip(),
-        "ml_problem_type": ml_insights.strip(),
-        "suggested_features": features.strip()
+        "summary": summary,
+        "ml_problem_type": ml_problem_type,
+        "special_requests": special_requests
     }
+
+
 
 # Main function
 def process_problem_statement(file_path):
     text = extract_full_ps_text(file_path)
-    return analyze_problem_statement(text)
+    return analyze_problem_statement_with_headers(text)

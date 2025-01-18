@@ -72,7 +72,7 @@ def classify_files_bedrock_fast(folder_path="problem_statement_files", num_lines
         # Call Bedrock
         result = generate_response(prompt=prompt, max_tokens=200)
         
-        print(result)
+        print(f"found 1 {result} for filename  {file_path.split('/')[-1]}")
         # Parse response and add to classification
         file_classification[file_path] = result.strip()
     
